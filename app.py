@@ -35,7 +35,7 @@ def index():
 def send_email(subject, message, manager_email):
     msg = MIMEText(message)
     msg['Subject'] = subject
-    msg['From'] = 'okrrecommender@hotmail.com'
+    msg['From'] = 'okrrecommender@outlook.com'
     msg['To'] =  manager_email
     try:
         smtp_server = smtplib.SMTP('smtp.office365.com', 587)
