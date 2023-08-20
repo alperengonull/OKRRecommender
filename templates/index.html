@@ -40,7 +40,7 @@
     <header>
       <nav class="navbar bg-dark">
         <div class="container">
-          <a class="navbar-brand text-white" href="#"> OKRCONNECTOR </a>
+          <a class="navbar-brand text-white" href="#"> OKRecommender </a>
         </div>
       </nav>
     </header>
@@ -49,36 +49,12 @@
       <div class="container">
         <br />
         <br />
-        <h1 class="mt-5">OKRCONNECTOR</h1>
+        <h1 class="mt-5">OKRecommender</h1>
         <p class="lead">
-          OKRCONNECTOR, yapay zeka ile OKR'larınızı yönetmenize yardımcı olur.
+          OKRecommender, yapay zeka ile OKR'larınızı yönetmenize yardımcı olur.
         </p>
 
         <div id="list-group" class="list-group w-auto"></div>
-
-        <div class="row">
-          <div class="col-md-6">
-            <div class="input-group mb-3" id="formfield">
-              <input
-                type="text"
-                class="form-control p-4"
-                id="chat-name"
-                placeholder="İsminizi yazınız"
-              />
-            </div>
-          </div>
-          <div class="col-md-6">
-            <div class="input-group mb-3" id="formfield">
-              <input
-                type="text"
-                class="form-control p-4"
-                id="chat-input"
-                placeholder="Şuanki pozisyonunuzu yazınız."
-                maxlength="100"
-              />
-            </div>
-          </div>
-        </div>
 
         <div class="input-group mb-3" id="formfield">
           <input
@@ -133,6 +109,29 @@
             maxlength="100"
           />
         </div>
+        <div class="row">
+          <div class="col-md-6">
+            <div class="input-group mb-3" id="formfield">
+              <input
+                type="email"
+                class="form-control p-4"
+                id="user-email"
+                placeholder="E-mail adresinizi yazınız"
+              />
+            </div>
+          </div>
+          <div class="col-md-6">
+             <div class="input-group mb-3" id="formfield">
+              <input
+                type="email"
+                class="form-control p-4"
+                id="manager-email"
+                placeholder="Yöneticinizin e-mail adresini yazınız."
+                maxlength="100"
+              />
+            </div>
+          </div>
+        </div>
         <div class="input-group-append">
           <button
             id="gpt-button"
@@ -157,6 +156,11 @@
     <script>
       var conversationHistory = []; // Bu dizi, konuşma geçmişini tutmak için kullanılacak
 
+      function validateEmail(email) {
+        var checkEmail = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+        return checkEmail.test(email);
+      }
+
       function sendChat() {
         var input1 = document.getElementById("chat-input").value;
         var input2 = document.getElementById("chat-input2").value;
@@ -164,8 +168,24 @@
         var input4 = document.getElementById("chat-input4").value;
         var input5 = document.getElementById("chat-input5").value;
         var userName = document.getElementById("chat-name").value;
+        var userEmail = document.getElementById("user-email").value;
+        var managerEmail = document.getElementById("manager-email").value;
 
-        if (!input1 || !input2 || !input3 || !input4 || !input5 || !userName) {
+        if (!validateEmail(userEmail) || !validateEmail(managerEmail)) {
+          alert("Lütfen geçerli bir e-posta adresi girin.");
+          return;
+        }
+
+        if (
+          !input1 ||
+          !input2 ||
+          !input3 ||
+          !input4 ||
+          !input5 ||
+          !userName ||
+          !userEmail ||
+          !managerEmail
+        ) {
           alert("Lütfen tüm alanları doldurunuz");
           return;
         }
@@ -182,7 +202,12 @@
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ input: combinedInput, userName: userName }),
+          body: JSON.stringify({
+            input: combinedInput,
+            userName: userName,
+            userEmail: userEmail,
+            managerEmail: managerEmail,
+          }),
         })
           .then((response) => response.json())
           .then((data) => {
@@ -214,6 +239,8 @@
         document.getElementById("chat-input4").value = "";
         document.getElementById("chat-input5").value = "";
         document.getElementById("chat-name").value = "";
+        document.getElementById("user-email").value = "";
+        document.getElementById("manager-email").value = "";
         document.getElementById("response").innerHTML = "";
         document.getElementById("conversation").innerHTML = "";
       }

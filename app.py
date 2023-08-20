@@ -2,9 +2,13 @@ from flask import Flask, render_template, request, jsonify
 import openai
 import sqlite3
 import datetime
+import smtplib
+from email.mime.text import MIMEText
+
 
 app = Flask(__name__)
-db = "test2.db"
+db = "test3.db"
+openai.api_key = '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'
 conn = sqlite3.connect(db)
 cursor = conn.cursor()
 cursor.execute("""
@@ -13,7 +17,9 @@ CREATE TABLE IF NOT EXISTS historicalOkr (
     name TEXT,
     request_date TEXT,
     background TEXT,
-    okr TEXT
+    okr TEXT,
+    user_email TEXT,
+    manager_email TEXT
 );
 """)
 conn.commit()
@@ -25,12 +31,22 @@ def index():
     return render_template('index.html')
 
 
-def add_okr(user_name, today, user_input, reply):
+
+# user_email , manager_email eklendi
+def add_okr(user_name, today, user_input, reply, user_email, manager_email):
     with sqlite3.connect(db) as conn:
         cursor = conn.cursor()
-        cursor.execute("INSERT INTO historicalOkr (name , request_date ,background , okr ) VALUES (?,?,?,?)",
-                       (user_name, today, user_input, reply))
+        cursor.execute("INSERT INTO historicalOkr (name , request_date ,background , okr, user_email , manager_email  ) VALUES (?,?,?,?,?,?)",
+                       (user_name, today, user_input, reply, user_email, manager_email))
         conn.commit()
+ 
+        subject = "Your OKR Results"
+        user_message = f"Hello {user_name},\n\nHere are your OKR results:\n\n{reply}"
+        manager_message = f"Hello Manager,\n\n{user_name} has generated OKRs. Here is the OKR:\n\n{reply}"
+        
+        send_email(subject, user_message, 'okrrecommender@hotmail.com', user_email)
+        send_email(subject, manager_message, 'okrrecommender@hotmail.com', manager_email)
+
         return True
 
 
@@ -42,12 +58,51 @@ def get_historical_okr(user_name):
         historical_okr = cursor.fetchall()
         conn.commit()
         return historical_okr
+    
+    
+def send_email(subject, message, user_email, manager_email):
+    msg = MIMEText(message)
+    msg['Subject'] = subject
+    msg['From'] = user_email
+    msg['To'] =  manager_email
+
+    try:
+        smtp_server = smtplib.SMTP('smtp.office365.com', 587)
+        smtp_server.starttls()  
+        smtp_server.login('okrrecommender@hotmail.com', 'okr159632?.')
+        smtp_server.send_message(msg)
+        smtp_server.quit()
+        print("Email sent successfully")
+    except Exception as e:
+        print("Error sending email:", str(e))    
+
+
+
+# get user manager from database
+def get_manager_email(user_name):
+    with sqlite3.connect(db) as conn:
+        cursor = conn.cursor()
+        query = "SELECT manager_email FROM historicalOkr WHERE name = ?"
+        cursor.execute(query, (user_name,))
+        manager_email = cursor.fetchone()
+        return manager_email[0] if manager_email else None
+# get user email from database
+def get_user_email(user_name):
+    with sqlite3.connect(db) as conn:
+        cursor = conn.cursor()
+        query = "SELECT user_email FROM historicalOkr WHERE name = ?"
+        cursor.execute(query, (user_name,))
+        user_email = cursor.fetchone()
+        return user_email[0] if user_email else None
 
 
 @app.route('/generate_okr', methods=['POST'])
 def generate_okr():
     user_name = request.json.get('userName')
     user_input = request.json.get('input')
+    user_email = request.json.get('userEmail')
+    manager_email = request.json.get('managerEmail')
+
     hr_prompt = (
         "Imagine you are an HR consultant tasked with assisting a company in improving its performance management process. "
         "Design a comprehensive proposal outlining how you will revamp their performance management system. "
@@ -67,6 +122,7 @@ def generate_okr():
     )
     employee_backgrounds = "Employee background information in Turkish."
     historicalValues = get_historical_okr(user_name)
+    
     if (historicalValues):
         historicalValue = '\n'.join(
             [', '.join(map(str, row)) for row in historicalValues])
@@ -92,12 +148,12 @@ def generate_okr():
         )
         reply = chat.choices[0].message['content']
         messages.append({"role": "assistant", "content": reply})
-        add_okr(user_name, today, user_input, reply)
+        add_okr(user_name, today, user_input, reply, user_email, manager_email)
 
         return jsonify({"response": reply})
     else:
         return jsonify({"response": "Please provide input."})
 
 
-if __name__ == '__main__':
+if __name__ == 'main':
     app.run(debug=True)
