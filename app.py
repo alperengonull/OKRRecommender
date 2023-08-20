@@ -8,7 +8,7 @@ from email.mime.text import MIMEText
 
 app = Flask(__name__)
 db = "test4.db"
-openai.api_key = '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'
+openai.api_key = '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'
 conn = sqlite3.connect(db)
 cursor = conn.cursor()
 cursor.execute("""
