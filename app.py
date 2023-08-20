@@ -7,8 +7,8 @@ from email.mime.text import MIMEText
 
 
 app = Flask(__name__)
-db = "test3.db"
-openai.api_key = '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'
+db = "test4.db"
+openai.api_key = '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'
 conn = sqlite3.connect(db)
 cursor = conn.cursor()
 cursor.execute("""
@@ -32,6 +32,22 @@ def index():
 
 
 
+def send_email(subject, message, manager_email):
+    msg = MIMEText(message)
+    msg['Subject'] = subject
+    msg['From'] = 'okrrecommender@hotmail.com'
+    msg['To'] =  manager_email
+    try:
+        smtp_server = smtplib.SMTP('smtp.office365.com', 587)
+        smtp_server.starttls()  
+        smtp_server.login(msg['From'] , 'okr159632?.')
+        smtp_server.send_message(msg)
+        smtp_server.quit()
+        print("Email sent successfully")
+    except Exception as e:
+        print("Error sending email:", str(e))    
+
+
 # user_email , manager_email eklendi
 def add_okr(user_name, today, user_input, reply, user_email, manager_email):
     with sqlite3.connect(db) as conn:
@@ -39,16 +55,7 @@ def add_okr(user_name, today, user_input, reply, user_email, manager_email):
         cursor.execute("INSERT INTO historicalOkr (name , request_date ,background , okr, user_email , manager_email  ) VALUES (?,?,?,?,?,?)",
                        (user_name, today, user_input, reply, user_email, manager_email))
         conn.commit()
- 
-        subject = "Your OKR Results"
-        user_message = f"Hello {user_name},\n\nHere are your OKR results:\n\n{reply}"
-        manager_message = f"Hello Manager,\n\n{user_name} has generated OKRs. Here is the OKR:\n\n{reply}"
-        
-        send_email(subject, user_message, 'okrrecommender@hotmail.com', user_email)
-        send_email(subject, manager_message, 'okrrecommender@hotmail.com', manager_email)
-
         return True
-
 
 def get_historical_okr(user_name):
     with sqlite3.connect(db) as conn:
@@ -60,41 +67,6 @@ def get_historical_okr(user_name):
         return historical_okr
     
     
-def send_email(subject, message, user_email, manager_email):
-    msg = MIMEText(message)
-    msg['Subject'] = subject
-    msg['From'] = user_email
-    msg['To'] =  manager_email
-
-    try:
-        smtp_server = smtplib.SMTP('smtp.office365.com', 587)
-        smtp_server.starttls()  
-        smtp_server.login('okrrecommender@hotmail.com', 'okr159632?.')
-        smtp_server.send_message(msg)
-        smtp_server.quit()
-        print("Email sent successfully")
-    except Exception as e:
-        print("Error sending email:", str(e))    
-
-
-
-# get user manager from database
-def get_manager_email(user_name):
-    with sqlite3.connect(db) as conn:
-        cursor = conn.cursor()
-        query = "SELECT manager_email FROM historicalOkr WHERE name = ?"
-        cursor.execute(query, (user_name,))
-        manager_email = cursor.fetchone()
-        return manager_email[0] if manager_email else None
-# get user email from database
-def get_user_email(user_name):
-    with sqlite3.connect(db) as conn:
-        cursor = conn.cursor()
-        query = "SELECT user_email FROM historicalOkr WHERE name = ?"
-        cursor.execute(query, (user_name,))
-        user_email = cursor.fetchone()
-        return user_email[0] if user_email else None
-
 
 @app.route('/generate_okr', methods=['POST'])
 def generate_okr():
@@ -148,7 +120,12 @@ def generate_okr():
         )
         reply = chat.choices[0].message['content']
         messages.append({"role": "assistant", "content": reply})
-        add_okr(user_name, today, user_input, reply, user_email, manager_email)
+        subject = "Your OKR Results"
+        user_message = f"Hello {user_name},\n\nHere are your OKR results:\n\n{reply}"
+        manager_message = f"Hello Manager,\n\n{user_name} has generated OKRs. Here is the OKR:\n\n{reply}"
+        send_email(subject, user_message,  user_email)
+        send_email(subject, manager_message, manager_email)
+        add_okr(user_name, today, user_input, reply,user_email, manager_email )
 
         return jsonify({"response": reply})
     else:
