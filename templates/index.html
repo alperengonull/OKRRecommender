@@ -45,6 +45,9 @@
       <nav class="navbar bg-dark">
         <div class="container">
           <a class="navbar-brand text-white" href="#"> OKRecommender </a>
+          <a class="d-flex text-white text-decoration-none" href="about.html"
+            >About us
+          </a>
         </div>
       </nav>
     </header>
@@ -52,7 +55,6 @@
     <main class="flex-shrink-0 mt-5">
       <div class="container body-container">
         <div id="list-group" class="list-group w-auto"></div>
-
         <div class="container">
           <div class="row">
             <div class="input-group mb-3" id="formfield">
@@ -86,7 +88,7 @@
                 data-bs-toggle="popover"
                 data-bs-content="Uzman olduğunuz ya da öğrendiğiniz tool, programlama dili, teknoloji, metodoloji vb. yazınız."
               >
-               ?
+                ?
               </button>
             </div>
             <div class="input-group mb-3" id="formfield">
@@ -97,13 +99,13 @@
                 placeholder="Geliştirmeniz gereken beceri veya yetenekler nelerdir?"
                 maxlength="100"
               />
-               <button
+              <button
                 type="button"
                 class="btn btn-lg btn-danger"
                 data-bs-toggle="popover"
                 data-bs-content="Yetersiz gördüğünüz veya geliştirmek istediğiniz beceri veya yetenekleriniz varsa yazınız. "
               >
-               ?
+                ?
               </button>
             </div>
             <div class="input-group mb-3" id="formfield">
@@ -114,13 +116,13 @@
                 placeholder="Çevrenizde veya sektörünüzde fark ettiğiniz hangi fırsatlar bulunuyor? Hangi alanlarda büyüme veya gelişme potansiyeli görüyorsunuz?"
                 maxlength="100"
               />
-               <button
+              <button
                 type="button"
                 class="btn btn-lg btn-danger"
                 data-bs-toggle="popover"
                 data-bs-content="Uzmanlaşmak istediğiniz alanlarda veya sektörünüzde fark ettiğiniz fırsatlar varsa yazınız."
               >
-               ?
+                ?
               </button>
             </div>
             <div class="input-group mb-3" id="formfield">
@@ -131,13 +133,13 @@
                 placeholder="Hangi dışsal faktörler veya engeller benim hedeflerime ulaşmamı zorlaştırabilir?"
                 maxlength="100"
               />
-               <button
+              <button
                 type="button"
                 class="btn btn-lg btn-danger"
                 data-bs-toggle="popover"
                 data-bs-content="Sektörünüzde veya çevrenizde sizi etkileyebilecek olumsuz faktörler veya tehlikeler varsa yazınız. "
               >
-               ?
+                ?
               </button>
             </div>
           </div>
@@ -161,23 +163,23 @@
             </div>
           </div>
           <div class="row">
-           <div class="input-group-append">
-          <button
-            id="gpt-button"
-            class="btn btn-primary btn-lg"
-            onclick="sendChat()"
-          >
-            <span id="button-content">Get OKR</span>
-          </button>
-          <button
-            type="button"
-            id="reset-button"
-            onclick="resetChat()"
-            class="btn btn-danger ml-3 btn-lg"
-          >
-            Reset
-          </button>
-        </div>
+            <div class="input-group-append">
+              <button
+                id="gpt-button"
+                class="btn btn-primary btn-lg"
+                onclick="sendChat()"
+              >
+                <span id="button-content">Get OKR</span>
+              </button>
+              <button
+                type="button"
+                id="reset-button"
+                onclick="resetChat()"
+                class="btn btn-danger ml-3 btn-lg"
+              >
+                Reset
+              </button>
+            </div>
           </div>
         </div>
         <div id="response" class="mt-3"></div>
@@ -192,7 +194,6 @@
       const popoverList = [...popoverTriggerList].map(
         (popoverTriggerEl) => new bootstrap.Popover(popoverTriggerEl)
       );
-
 
       var conversationHistory = []; // Bu dizi, konuşma geçmişini tutmak için kullanılacak
 
