@@ -1,3 +1,3 @@
 
-__pycache__/app.cpython-311.pyc
-test4.db
+__pycache__
+*.db
