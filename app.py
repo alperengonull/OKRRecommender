@@ -7,8 +7,8 @@ from email.mime.text import MIMEText
 
 
 app = Flask(__name__)
-db = "test4.db"
-openai.api_key = ''
+db = "test3.db"
+openai.api_key = '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'
 conn = sqlite3.connect(db)
 cursor = conn.cursor()
 cursor.execute("""
@@ -35,7 +35,7 @@ def index():
 def send_email(subject, message, manager_email):
     msg = MIMEText(message)
     msg['Subject'] = subject
-    msg['From'] = 'okrrecommender@outlook.com'
+    msg['From'] = 'okrrecommender@hotmail.com'
     msg['To'] =  manager_email
     try:
         smtp_server = smtplib.SMTP('smtp.office365.com', 587)
@@ -60,7 +60,7 @@ def add_okr(user_name, today, user_input, reply, user_email, manager_email):
 def get_historical_okr(user_name):
     with sqlite3.connect(db) as conn:
         cursor = conn.cursor()
-        query = "SELECT * FROM historicalOkr WHERE name = ?"
+        query = "SELECT name, request_date, background, okr FROM historicalOkr WHERE name = ? ORDER BY request_date DESC LIMIT 1"
         historical_okr = cursor.execute(query, (user_name,))
         historical_okr = cursor.fetchall()
         conn.commit()
