@@ -5,10 +5,12 @@ import datetime
 import smtplib
 from email.mime.text import MIMEText
 
+ 
+
 
 app = Flask(__name__)
 db = "prod.db"
-openai.api_key = ''
+openai.api_key = '' #uniq open ai key
 conn = sqlite3.connect(db)
 cursor = conn.cursor()
 cursor.execute("""
@@ -32,15 +34,15 @@ def index():
 
 
 
-def send_email(subject, message, manager_email):
-    msg = MIMEText(message)
+def send_email(subject, message, manager_email,historicalValue):
+    msg = MIMEText(message + "\n Old data:\n "+historicalValue)
     msg['Subject'] = subject
-    msg['From'] = 'okrrecommender@hotmail.com'
+    msg['From'] = 'email@hotmail.com'
     msg['To'] =  manager_email
     try:
         smtp_server = smtplib.SMTP('smtp.office365.com', 587)
         smtp_server.starttls()  
-        smtp_server.login(msg['From'] , 'okr159632?.')
+        smtp_server.login(msg['From'] , 'emailpassword')
         smtp_server.send_message(msg)
         smtp_server.quit()
         print("Email sent successfully")
@@ -106,7 +108,6 @@ def generate_okr():
         + okr_recommendation_process
         + "\n\n"
         + "Your task is to recommend suitable OKRs for the following employee backgrounds:\n"
-        + "Old Swot Analysis : " + str(historicalValue)
         + "New Swot : " + user_input
         + "\n\n"
         + employee_backgrounds
@@ -123,8 +124,8 @@ def generate_okr():
         subject = "Your OKR Results"
         user_message = f"Hello {user_name},\n\nHere are your OKR results:\n\n{reply}"
         manager_message = f"Hello Manager,\n\n{user_name} has generated OKRs. Here is the OKR:\n\n{reply}"
-        send_email(subject, user_message,  user_email)
-        send_email(subject, manager_message, manager_email)
+        send_email(subject, user_message,  user_email,historicalValue)
+        send_email(subject, manager_message, manager_email,historicalValue)
         add_okr(user_name, today, user_input, reply,user_email, manager_email )
 
         return jsonify({"response": reply})
