@@ -32,6 +32,9 @@ messages = [{"role": "system", "content": "You are human resources  "}]
 def index():
     return render_template('index.html')
 
+@app.route('/about')
+def about():
+    return render_template('about.html')
 
 
 def send_email(subject, message, manager_email,historicalValue):
